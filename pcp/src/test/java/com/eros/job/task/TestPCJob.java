@@ -2,6 +2,7 @@ package com.eros.job.task;
 
 import com.eros.job.PCJob;
 import com.eros.job.conf.JobConfig;
+import com.eros.job.exception.PCException;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -37,7 +38,7 @@ public class TestPCJob extends PCJob<String> {
 
         public TestProducer(PCJob<String> job) {
             super(generateTaskName(job.getJobConfig(), (int)ORDER.incrementAndGet(), "p"), job);
-            Object o = job.getJobConfig().get("job.max.count");
+            Object o = job.getJobConfig().get(new JobConfig.JobConfKey("job.max.count", "the max line number for job", 10_0000L));
             if(o == null)
                 maxCount = 10_0000L;
             else
@@ -45,7 +46,7 @@ public class TestPCJob extends PCJob<String> {
         }
 
         @Override
-        public String produce() {
+        public String produce() throws PCException{
             long order = ORDER.incrementAndGet();
             if(order > maxCount)
                 return null;
@@ -63,7 +64,7 @@ public class TestPCJob extends PCJob<String> {
         }
 
         @Override
-        public void consume(String str) {
+        public void consume(String str) throws PCException {
 
             try{
                 if(writer == null){
@@ -98,8 +99,8 @@ public class TestPCJob extends PCJob<String> {
     public static void main(String[] args) {
 
         JobConfig config = new JobConfig();
-        config.put(JobConfig.CONSUMER_NUM_KEY, 2);
-        config.put(JobConfig.PRODUCER_NUM_KEY, 2);
+        config.put(JobConfig.CONSUMER_NUM, 2);
+        config.put(JobConfig.PRODUCER_NUM, 2);
         TestPCJob pcJob = new TestPCJob(config);
         pcJob.startup();
     }

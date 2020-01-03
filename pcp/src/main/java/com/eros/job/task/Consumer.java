@@ -3,6 +3,7 @@ package com.eros.job.task;
 import com.eros.common.util.LoggerUtil;
 import com.eros.common.service.Stoppable;
 import com.eros.job.PCJob;
+import com.eros.job.exception.PCException;
 import com.eros.job.shared.SharedHouse;
 import org.apache.log4j.Logger;
 
@@ -38,7 +39,7 @@ public abstract class Consumer<P> implements Runnable, Stoppable {
     public Consumer(String taskName, PCJob<P> job) {
         this.taskName = taskName;
         this.sharedHouse = job.getSharedHouse();
-        this.logger = LoggerUtil.getLogger(taskName, this.getClass());
+        this.logger = LoggerUtil.getLogger(job.serviceName()+"-consumer", this.getClass());
     }
 
     @Override
@@ -60,8 +61,13 @@ public abstract class Consumer<P> implements Runnable, Stoppable {
 
                     if(sharedHouse.isProducerStopped())
                         break;
-                } catch (Throwable e) {
-                    logger.warn(String.format("consume,fail,task:%s", taskName));
+                }
+                catch (PCException e) {
+                    logger.warn(String.format("consume-fail,task:%s continue,cause: ", taskName), e);
+                }
+                catch (Throwable e){
+                    logger.error(String.format("consume-unknown error,task:%s stop,cause: ", taskName), e);
+                    break;
                 }
             }
 
@@ -80,7 +86,7 @@ public abstract class Consumer<P> implements Runnable, Stoppable {
      *
      * @return <P> product
      */
-    public abstract void consume(P p);
+    public abstract void consume(P p) throws PCException;
 
     public String taskName(){
         return taskName;

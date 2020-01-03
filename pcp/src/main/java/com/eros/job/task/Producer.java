@@ -4,6 +4,7 @@ import com.eros.job.PCJob;
 import com.eros.job.conf.JobConfig;
 import com.eros.common.util.LoggerUtil;
 import com.eros.common.service.Stoppable;
+import com.eros.job.exception.PCException;
 import com.eros.job.shared.SharedHouse;
 import org.apache.log4j.Logger;
 
@@ -46,7 +47,7 @@ public abstract class Producer<P> implements Runnable, Stoppable {
         this.taskName = taskName;
         this.sharedHouse = job.getSharedHouse();
         this.config = job.getJobConfig();
-        this.logger = LoggerUtil.getLogger(taskName, this.getClass());
+        this.logger = LoggerUtil.getLogger(job.serviceName()+"-producer", this.getClass());
     }
 
     @Override
@@ -57,17 +58,31 @@ public abstract class Producer<P> implements Runnable, Stoppable {
             if (logger.isInfoEnabled())
                 logger.info(String.format("task:%s starting...", taskName));
 
-            while (!stopped) {
+            while (!stopped && !sharedHouse.isConsumerStopped()) {
                 try {
                     P p = produce();
                     if (p == null)
                         break;
-                    boolean result = sharedHouse.offer(p, config.getPCTimeOut(), TimeUnit.MILLISECONDS);
+
+                    long escapedTime = 0L;
+                    boolean result = false;
+                    while(escapedTime < config.getPCTimeOut()){
+                        result = sharedHouse.offer(p, 100L, TimeUnit.MILLISECONDS);
+                        if(result)
+                            break;
+                        if(sharedHouse.isConsumerStopped())
+                            break;
+                    }
                     if (!result) {
                         logger.warn(String.format("produce,offer,fail,task:%s,product:%s", taskName, p));
                     }
-                } catch (Throwable e) {
-                    logger.warn(String.format("produce,fail,task:%s", taskName), e);
+                }
+                catch (PCException e) {
+                    logger.warn(String.format("produce-fail,task:%s continue,cause: ", taskName), e);
+                }
+                catch (Throwable e){
+                    logger.error(String.format("produce-fail,task:%s stop,cause: ", taskName), e);
+                    break;
                 }
             }
 
@@ -85,7 +100,7 @@ public abstract class Producer<P> implements Runnable, Stoppable {
      *
      * @return <P> product
      */
-    public abstract P produce();
+    public abstract P produce() throws PCException;
 
     public String taskName(){
         return taskName;

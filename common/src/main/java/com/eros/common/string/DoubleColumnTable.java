@@ -46,19 +46,19 @@ public class DoubleColumnTable {
         this.header = headBuilder.toString();
         this.midSep = midSep;
         this.length = length;
-        this.key_ = "%" + length/3 + "s\t";
-        this.value_ ="\t%-" + length*2/3 + "s";
+        this.key_ = "%" + length/2 + "s\t";
+        this.value_ ="\t%-" + length/2 + "s";
         this.itemKey = String.format(key_, itemKey);
         this.itemValue = String.format(value_, itemValue);;
     }
 
-    public String format(Map<String, Object> kvs){
+    public String format(Map<? extends Object, Object> kvs){
         StringBuilder format = new StringBuilder();
         format.append("\n").append(header).append("\n");
         format.append(itemKey).append(midSep).append(itemValue).append("\n");
         format.append(header).append("\n");
-        for(Iterator<Map.Entry<String, Object>> it = kvs.entrySet().iterator(); it.hasNext();){
-            Map.Entry<String, Object> entry = it.next();
+        for(Iterator<? extends Map.Entry<?, Object>> it = kvs.entrySet().iterator(); it.hasNext();){
+            Map.Entry<? extends Object, Object> entry = it.next();
             String key = String.format(key_, entry.getKey());
             String value = String.format(value_, entry.getValue());
             format.append(key).append(midSep).append(value).append("\n");

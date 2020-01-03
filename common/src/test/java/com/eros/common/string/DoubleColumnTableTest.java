@@ -2,11 +2,14 @@ package com.eros.common.string;
 
 import com.eros.common.util.LoggerUtil;
 import org.apache.log4j.Logger;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DoubleColumnTableTest {
 
     private static final String LOG_FILE_NAME = "test";

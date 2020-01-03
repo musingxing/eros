@@ -3,6 +3,7 @@ package com.eros.common.util;
 
 import org.apache.log4j.*;
 
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -17,6 +18,12 @@ import java.util.concurrent.locks.LockSupport;
  */
 public class LoggerUtil {
 
+    private static final ThreadLocal<SimpleDateFormat> DATE_FORMATTER = new ThreadLocal<SimpleDateFormat>(){
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd");
+        }
+    };
     /** *******************************  Log Properties Def *********************** */
     private static final String LOG_FILE_SUFFIX = ".log";
     private static final String LAY_OUT_PATTERN = "%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c.%M():%L -%m%n";
@@ -34,7 +41,7 @@ public class LoggerUtil {
      * @param clazz      Class
      * @return           Logger
      */
-    public static Logger getLogger(String fileName, Class<?> clazz){
+    public static Logger getLogger(String fileName, Class<?> clazz, boolean hasDate){
 
         // waiting for LOG-LEVEL to be reset successfully
         while(LOG_LEVEL_RESET_OPEN){
@@ -46,7 +53,7 @@ public class LoggerUtil {
         if(logger != null)
             return logger;
 
-        String logFile = fileName + LOG_FILE_SUFFIX;
+        String logFile = fileName + LOG_FILE_SUFFIX + (hasDate ? "."+DATE_FORMATTER.get().format(System.currentTimeMillis()) : "");
         boolean ifAddThread = false;
         try{
             // record who is doing this
@@ -93,6 +100,17 @@ public class LoggerUtil {
                 THREADS.remove(Thread.currentThread());
             }
         }
+    }
+
+    /**
+     * Getter Logger
+     *
+     * @param fileName   Log File
+     * @param clazz      Class
+     * @return           Logger
+     */
+    public static Logger getLogger(String fileName, Class<?> clazz){
+        return getLogger(fileName, clazz, true);
     }
 
     /**
