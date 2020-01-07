@@ -120,7 +120,7 @@ public class LoggerUtil {
      * @return           Logger
      */
     public static Logger getLogger(Class<?> clazz){
-        return getLogger("default", clazz);
+        return getLogger("eros", clazz);
     }
 
     /**

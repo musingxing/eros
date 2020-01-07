@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job name="eros-first-job">
+    <item key="job.producer.num" value="2"  dataType="integer" desc="the number of producer task" />
+    <item key="job.consumer.num" value="2"  dataType="integer" desc="the number of consumer task" />
+    <item key="job.file.dirs" value="D:\data1,D:\\data2,D:\\data3"  dataType="string" desc="the data file directories" />
+    <item key="job.file.type" value=".csv"  dataType="string" desc="the data file directories" />
+    <item key="job.file.total.line.num" value="1000_0000"  dataType="long" desc="the max line number for all files" />
+    <item key="job.file.line.max.number" value="100_0000"  dataType="integer" desc="the max number of file lines" />
+    <item key="job.file.line.batch.flush" value="1000"  dataType="integer" desc="the batch size of lines to flush" />
+    <item key="job.file.field.separator" value="|"  dataType="char" desc="the line separator between fields" />
+    <item key="job.file.data.generator" value="com.eros.datagen.generator.impl.RandomIntGenerator,com.eros.datagen.generator.impl.RandomHexCharsGenerator,com.eros.datagen.generator.impl.RandomHexCharsGenerator"
+          dataType="string" desc="the field generator in lines" />
+</job>

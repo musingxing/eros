@@ -7,6 +7,7 @@ import com.eros.job.PCJob;
 import com.eros.job.conf.JobConfig;
 import com.eros.job.task.Consumer;
 import com.eros.job.task.Producer;
+import org.omg.CORBA.PUBLIC_MEMBER;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -79,6 +80,27 @@ public class LgfPCJob extends PCJob<List<String>> {
 
     public LocalFileManager getFileManager() {
         return fileManager;
+    }
+
+    /**
+     * Build Lgf-PCJob
+     *
+     * @param jobName   job name
+     * @param confFile conf file
+     * @return {@link LgfPCJob}
+     */
+    public static LgfPCJob buildJob(String jobName, String confFile){
+
+        LgfJobConfig config = new LgfJobConfig();
+        if(jobName != null) {
+            config.setJobName(jobName);
+        }
+        // add items from config file
+        Map<JobConfig.JobConfKey, Object> confKVs = (confFile==null || confFile.isEmpty())? null : LgfJobConfig.parseXMLConf(confFile);
+        if(confKVs != null && !confKVs.isEmpty())
+            config.putAll(confKVs);
+        LgfPCJob job = new LgfPCJob(config);
+        return job;
     }
 
     // JUST FOR TEST

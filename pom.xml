@@ -11,6 +11,7 @@
     <modules>
         <module>common</module>
         <module>pcp</module>
+        <module>shell</module>
         <module>datagen</module>
     </modules>
 
@@ -20,7 +21,8 @@
         <slf4j.version>1.7.25</slf4j.version>
         <log.version>1.2.17</log.version>
         <eros.version>1.0.0</eros.version>
-
+        <apache.cli.version>1.3.1</apache.cli.version>
+        <xstream.version>1.4.11</xstream.version>
     </properties>
 
 

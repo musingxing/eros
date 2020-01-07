@@ -17,4 +17,9 @@ public interface Service extends Stoppable {
      * Service startup
      */
     public void startup();
+
+    /**
+     * @return True if {@link #startup()} has been called.
+     */
+    boolean isStartup();
 }

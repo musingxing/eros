@@ -76,7 +76,9 @@ public class LocalFileManager {
     }
 
     public static LocalFileManager newFileManager(List<String> dirs, String filePrefix, String fileType){
-        // 做校驗，這裏暫時省略
+        // check dirs
+        // check filePrefix
+        // check file type
         return new LocalFileManager(dirs, filePrefix, fileType);
     }
 }

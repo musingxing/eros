@@ -36,10 +36,24 @@ public class LgfJobConfig extends JobConfig {
 //        Dir_Parallel
 //    }
 
-
-
     public List<DataGenerator> getDataGenerators(){
-        return (List<DataGenerator>)get(JOB_FILE_DATA_GENERATOR);
+        // convert
+        Object value = get(JOB_FILE_DATA_GENERATOR);
+        if(value == null)
+            return null;
+        if( value instanceof List)
+            return (List<DataGenerator>)get(JOB_FILE_DATA_GENERATOR);
+        if(value instanceof String){
+            List<DataGenerator> generators = new ArrayList<>();
+            String[] genStrs = ((String)value).split(",");
+            for(String str : genStrs){
+                DataGenerator dataGenerator = DataGenerator.parse(str.trim());
+                generators.add(dataGenerator);
+            }
+            put(JOB_FILE_DATA_GENERATOR, generators);
+            return generators;
+        }
+        throw new IllegalArgumentException("Unknown data generator: " + value);
     }
 
     public LgfJobConfig setDataGenerators(List<DataGenerator> generators){
@@ -47,11 +61,21 @@ public class LgfJobConfig extends JobConfig {
         return this;
     }
 
-    public List<String> getFileDirs(){
+    public List<String> getFileDirs(){ //需要转换
         Object dirs = get(JOB_FILE_DIRS);
         if(dirs == null){
            return null;
         }
+        if(dirs instanceof String){
+            List<String> curDirs = new ArrayList<>();
+            String[] genDirs = ((String)dirs).split(",");
+            for(String genDir : genDirs){
+                curDirs.add(genDir.trim());
+            }
+            put(JOB_FILE_DIRS, curDirs);
+            return curDirs;
+        }
+
         if(! (dirs instanceof Collection)){
             throw new IllegalArgumentException("Data directory is not list '" + JOB_FILE_DIRS + "'.");
         }

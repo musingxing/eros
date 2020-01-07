@@ -4,6 +4,7 @@ import com.eros.common.service.Service;
 import com.eros.common.string.DoubleColumnTable;
 import com.eros.common.util.LoggerUtil;
 import com.eros.job.conf.JobConfig;
+import com.eros.job.manager.JobManager;
 import com.eros.job.shared.SharedHouse;
 import com.eros.job.task.Consumer;
 import com.eros.job.task.Producer;
@@ -68,6 +69,7 @@ public abstract class PCJob<P> implements Service, Runnable {
         Object itemKey = config.getHeadItemKey();
         Object itemValue = config.getHeadItemValue();
         this.table = DoubleColumnTable.newTable(itemKey.toString(), itemValue.toString());
+        JobManager.register(this);
     }
 
     @Override
@@ -178,6 +180,11 @@ public abstract class PCJob<P> implements Service, Runnable {
     }
 
     @Override
+    public boolean isStartup() {
+        return startUp;
+    }
+
+    @Override
     public String toString() {
         return config.getJobName();
     }
@@ -188,7 +195,7 @@ public abstract class PCJob<P> implements Service, Runnable {
             printJobInfo();
             LockSupport.parkNanos(10*1000L*1000L*1000L);
 
-            // ¼à²âÉú²úÕßÈÎÎñÔËĞĞÇé¿ö
+            // ç›‘æµ‹ç”Ÿäº§è€…ä»»åŠ¡è¿è¡Œæƒ…å†µ
             for( Iterator<Producer<P>> it = producers.iterator(); it.hasNext();){
                 Producer<P> producer = it.next();
                 if(producer.isStopped()){
@@ -200,7 +207,7 @@ public abstract class PCJob<P> implements Service, Runnable {
                 logger.info("All producer tasks stopped");
                 sharedHouse.setProducerStopped(true);
             }
-            // ¼à²âÏû·ÑÕßÈÎÎñÔËĞĞÇé¿ö
+            // ç›‘æµ‹æ¶ˆè´¹è€…ä»»åŠ¡è¿è¡Œæƒ…å†µ
             for( Iterator<Consumer<P>> it = consumers.iterator(); it.hasNext();){
                 Consumer<P> consumer = it.next();
                 if(consumer.isStopped()){
@@ -212,7 +219,7 @@ public abstract class PCJob<P> implements Service, Runnable {
                 logger.info("All consumer tasks stopped");
                 sharedHouse.setConsumerStopped(true);
             }
-            // ×Ô¶¯Í£Ö¹¿ØÖÆ
+            // è‡ªåŠ¨åœæ­¢æ§åˆ¶
             if(consumers.isEmpty() && producers.isEmpty()){
                 stopped = true;
             }
