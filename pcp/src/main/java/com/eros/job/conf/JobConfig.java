@@ -20,18 +20,14 @@ import java.util.concurrent.TimeUnit;
 public class JobConfig {
 
     public static final JobConfKey JOB_NAME = new JobConfKey("job.name", "job name", "eros");
+    public static final JobConfKey JOB_TYPE_NAME = new JobConfKey("job.type.name", "job type name", "default");
     public static final JobConfKey PC_TIME_OUT = new JobConfKey("job.producer.consumer.timeout", "producer/consumer task timeout", 5 * 60 * 1000L);
     public static final JobConfKey PRODUCER_NUM = new JobConfKey("job.producer.num", "the number of producer task", 1);
     public static final JobConfKey CONSUMER_NUM = new JobConfKey("job.consumer.num", "the number of consumer task", 1);
     public static final JobConfKey JOB_LOG_ITEM_KEY = new JobConfKey("job.item.key.name", "the head key item", "ITEMS");
     public static final JobConfKey JOB_LOG_ITEM_VALUE = new JobConfKey("job.item.value.name", "the head value item", "VALUES");
     public static final JobConfKey JOB_LOG_SLEEP_PERIOD = new JobConfKey("job.log.sleep.period", "the period to print log", 10 * 1000L);
-    public static final ThreadLocal<SimpleDateFormat> DATE_FORMATTER = new ThreadLocal<SimpleDateFormat>() {
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        }
-    };
+    public static final ThreadLocal<SimpleDateFormat> DATE_FORMATTER = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"));
     public static final JobConfKey JOB_DATE_FORMATTER = new JobConfKey("job.date.formatter", "format the time", DATE_FORMATTER.get());
 
     /**
@@ -56,6 +52,18 @@ public class JobConfig {
             if (o == null || getClass() != o.getClass()) return false;
             JobConfKey that = (JobConfKey) o;
             return Objects.equals(KEY, that.KEY);
+        }
+
+        public String key() {
+            return KEY;
+        }
+
+        public String desc() {
+            return DESC;
+        }
+
+        public Object defaultValue() {
+            return DEFAULT;
         }
 
         @Override
@@ -100,6 +108,16 @@ public class JobConfig {
 
     public JobConfig setJobName(String jobName) {
         kvs.put(JOB_NAME, jobName);
+        return this;
+    }
+
+    public String getJobTypeName() {
+        Object jobName = kvs.get(JOB_TYPE_NAME);
+        return jobName == null ? (String) JOB_TYPE_NAME.DEFAULT : jobName.toString();
+    }
+
+    public JobConfig setJobTypeName(String jobTypeName) {
+        kvs.put(JOB_TYPE_NAME, jobTypeName);
         return this;
     }
 

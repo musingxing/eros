@@ -77,6 +77,10 @@ public abstract class PCJob<P> implements Service, Runnable {
         return config.getJobName();
     }
 
+    public String getJobTypeName(){
+        return config.getJobTypeName();
+    }
+
     public JobConfig getJobConfig(){
         return config;
     }
@@ -192,7 +196,7 @@ public abstract class PCJob<P> implements Service, Runnable {
     @Override
     public void run() {
         while(!stopped || !producers.isEmpty() || !consumers.isEmpty()){
-            printJobInfo();
+            logger.info(getJobInfo());
             LockSupport.parkNanos(10*1000L*1000L*1000L);
 
             // 监测生产者任务运行情况
@@ -224,13 +228,13 @@ public abstract class PCJob<P> implements Service, Runnable {
                 stopped = true;
             }
         }
-        printJobInfo();
+        logger.info(getJobInfo());
         logger.info("Job: " + serviceName() + " exiting...");
         LockSupport.parkNanos(3*1000L*1000L*1000L);
         after();
     }
 
-    void printJobInfo(){
+    public String getJobInfo(){
         Map<String, Object> logKVs = new LinkedHashMap<>();
         logKVs.put("Running producers", producers.size());
         logKVs.put("Running consumers", consumers.size());
@@ -242,7 +246,7 @@ public abstract class PCJob<P> implements Service, Runnable {
         if(appendKVs != null && !appendKVs.isEmpty()){
             logKVs.putAll(appendKVs);
         }
-        logger.info(table.format(logKVs));
+        return table.format(logKVs);
     }
 
     public void before() {

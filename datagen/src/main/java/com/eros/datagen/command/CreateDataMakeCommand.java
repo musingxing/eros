@@ -1,6 +1,7 @@
 package com.eros.datagen.command;
 
 import com.eros.datagen.local.LgfPCJob;
+import com.eros.job.conf.JobConfig;
 import com.eros.shell.command.BaseCommand;
 import com.eros.shell.exception.CommandException;
 import com.eros.shell.exception.CommandParseException;
@@ -9,7 +10,6 @@ import org.apache.commons.cli.*;
 
 import java.io.File;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -19,7 +19,7 @@ import java.util.Set;
  *
  * dmaker create [JOB] {CONFIG}
  * e.g.
- *    dmaker create -local eros-first-job /myjob/config.xml
+ *    dmaker create --type=local --job-name=eros-first-job
  *
  *
  * @author Eros
@@ -46,8 +46,8 @@ public class CreateDataMakeCommand  extends BaseCommand {
     /**
      * Constructor
      */
-    public CreateDataMakeCommand(String cmdStr, String optionStr) {
-        super("dmaker create", "[-t type] [-c conf]");
+    public CreateDataMakeCommand() {
+        super("dmaker", "create");
     }
 
     @Override
@@ -67,66 +67,70 @@ public class CreateDataMakeCommand  extends BaseCommand {
 
     @Override
     public boolean exec() throws CommandException {
+
+        if(!cl.hasOption("t"))
+            System.out.println("\nWARNING: Not set job type and use default: " + JobConfig.JOB_TYPE_NAME.defaultValue());
         String jobType =  cl.hasOption("t") ?  cl.getOptionValue("t") : "local";
         if(!jobTypes.contains(jobType))
             throw new MalformedCommandException("-t argument must be job type in " + jobTypes);
 
+        if(!cl.hasOption("j"))
+            System.out.println("\nWARNING: Not set job name and use default: " + JobConfig.JOB_NAME.defaultValue());
+        String jobName = options.hasOption("j") ? cl.getOptionValue("j") : null;
+
         String conf = cl.getOptionValue("c");
-        if(conf != null && !conf.isEmpty()){
-            File confFile = new File(conf);
-            if(!conf.endsWith(".xml"))
-                throw new MalformedCommandException("-c argument specify configuration file " + conf + " is not '.xml'");
-            if(!confFile.exists())
-                throw new MalformedCommandException("-c argument specify configuration file "  + conf + " inexistence");
-            if(!confFile.isDirectory())
-                throw new MalformedCommandException("-c argument specify configuration file " + conf + " is a directory");
+        if(conf == null || conf.isEmpty()){
+            throw new MalformedCommandException("-c argument must be specified for configuration file");
         }
 
-        String jobName = options.hasOption("j") ? cl.getOptionValue("j") : null;
-        try{
-            switch (jobType){
-                case "local":{
-                    LgfPCJob job = LgfPCJob.buildJob(jobName, conf);
-                    job.startup();
-                    out.println(job.getJobConfig());
-                    break;
-                }
-                case "hdfs":{
-                    err.println("Not support hdfs file system");
-                    break;
-                }
+        File confFile = new File(conf);
+        if (!conf.endsWith(".xml")) {
+            throw new MalformedCommandException("-c argument specify configuration file " + conf + " is not '.xml'");
+        }
+        if (!confFile.exists()) {
+            throw new MalformedCommandException("-c argument specify configuration file " + conf + " inexistence");
+        }
+        if (!confFile.isDirectory()) {
+            throw new MalformedCommandException("-c argument specify configuration file " + conf + " is a directory");
+        }
 
-                default:{
-                    err.println("Unknown file system: " + jobType);
-                    break;
-                }
+        switch (jobType) {
+            case "local": {
+                LgfPCJob job = LgfPCJob.buildJob(jobName, conf);
+                job.startup();
+                out.println(job.getJobConfig());
+                break;
             }
-        }catch (Throwable e){
-            err.println("Fail to exec command: " + toString() + ", cause: " + e.getMessage());
-            throw new CommandException(e);
+            case "hdfs": {
+                err.println("Not support hdfs file system");
+                break;
+            }
+
+            default: {
+                err.println("Unknown file system: " + jobType);
+                break;
+            }
         }
         return true;
     }
 
     @Override
+    public String getUsageStr() {
+        return genUsageStr(getCmdStr(), getOptionStr(), options.getOptions());
+    }
+
+    @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder(getClass().getSimpleName()).append("[ ");
-        for(String arg : args){
-            builder.append(arg).append(" ");
-        }
-        for(Iterator<Option> it = cl.iterator(); it.hasNext();){
-            Option option = it.next();
-            String desc =  "--" + option.getLongOpt() + "=" + option.getValue()+" ";
-            builder.append(desc);
-        }
-        return builder.append("]").toString();
+       return commandToString(args, cl==null ? null : cl.getOptions());
     }
 
     public static void main(String[] args) throws Exception {
-        CreateDataMakeCommand command = new CreateDataMakeCommand("dmaker", "create");
-        String[] cmdArgs = {"dmaker", "create", "--conf=conf.xml" , "-t", "local"};
-        BaseCommand baseCommand = command.parse(cmdArgs);
-        System.out.println(baseCommand.toString());
-        baseCommand.exec();
+        CreateDataMakeCommand command = new CreateDataMakeCommand();
+//        String[] cmdArgs = {"dmaker", "create", "--conf=conf.xml" , "-t", "local"};
+        String[] cmdArgs = {"dmaker", "create"};
+        command.parse(cmdArgs);
+        System.out.println(command.toString());
+        System.out.println(command.getUsageStr());
+        command.exec();
     }
 }

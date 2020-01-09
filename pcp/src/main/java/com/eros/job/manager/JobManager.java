@@ -54,19 +54,19 @@ public class JobManager{
                 }
             }
         }
-        String jobID = getJobID(job);
+        String jobID = getJobID(job.getJobTypeName(), job.serviceName());
         if(REGISTERED_PC_JOBS.containsKey(jobID) || RUNNING_PC_JOBS.containsKey(jobID)){
             throw new RuntimeException("Job: " + job.serviceName() + " exist and can't resubmit at the same time");
         }
         REGISTERED_PC_JOBS.put(jobID, job);
     }
 
-    private static String getJobID(PCJob job){
-        return job.getClass().getCanonicalName() + ":" + job.serviceName();
+    private static String getJobID(String jobTypeName, String jobName){
+        return jobTypeName+ "-" + jobName;
     }
 
-    public static PCJob queryJob(Class<?> jobClass, String jobName){
-        String jobID = jobClass.getCanonicalName()+":"+jobName;
+    public static PCJob queryJob(String jobTypeName, String jobName){
+        String jobID = getJobID(jobTypeName, jobName);
         PCJob job = REGISTERED_PC_JOBS.get(jobID);
         if(job != null)
             return job;

@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class DoubleColumnTable {
 
-    private static final char HEAD_SEP = '—';
+    private static final char HEAD_SEP = '-';
     private static final char SEP = '|';
     private static final int LENGTH = 192;
     private static final int MIN_LINE_LENGTH = 64;

@@ -3,6 +3,7 @@ package com.eros.common.util;
 
 import org.apache.log4j.*;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Map;
@@ -25,6 +26,7 @@ public class LoggerUtil {
         }
     };
     /** *******************************  Log Properties Def *********************** */
+    private static final String LOG_HOME = System.getProperty("com.eros.home");
     private static final String LOG_FILE_SUFFIX = ".log";
     private static final String LAY_OUT_PATTERN = "%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c.%M():%L -%m%n";
     private static final long DEFAULT_MAX_FILE_SIZE = 50L *1024L *1024L;
@@ -41,7 +43,7 @@ public class LoggerUtil {
      * @param clazz      Class
      * @return           Logger
      */
-    public static Logger getLogger(String fileName, Class<?> clazz, boolean hasDate){
+    public static Logger getLogger(String fileName, Class<?> clazz, boolean hasDate, boolean openConsole){
 
         // waiting for LOG-LEVEL to be reset successfully
         while(LOG_LEVEL_RESET_OPEN){
@@ -53,7 +55,7 @@ public class LoggerUtil {
         if(logger != null)
             return logger;
 
-        String logFile = fileName + LOG_FILE_SUFFIX + (hasDate ? "."+DATE_FORMATTER.get().format(System.currentTimeMillis()) : "");
+        String logFile = genFilePath(fileName, hasDate);
         boolean ifAddThread = false;
         try{
             // record who is doing this
@@ -78,15 +80,17 @@ public class LoggerUtil {
             appender.activateOptions();
             logger.addAppender(appender);
 
-            // console appender
-            ConsoleAppender consoleAppender = new ConsoleAppender();
-            consoleAppender.setEncoding("utf-8");
+            if(openConsole){
+                // console appender
+                ConsoleAppender consoleAppender = new ConsoleAppender();
+                consoleAppender.setEncoding("utf-8");
 
-            PatternLayout consolePatternLayout = new PatternLayout();
-            consolePatternLayout.setConversionPattern(LAY_OUT_PATTERN);
-            consoleAppender.setLayout(patternLayout);
-            consoleAppender.activateOptions();
-            logger.addAppender(consoleAppender);
+                PatternLayout consolePatternLayout = new PatternLayout();
+                consolePatternLayout.setConversionPattern(LAY_OUT_PATTERN);
+                consoleAppender.setLayout(patternLayout);
+                consoleAppender.activateOptions();
+                logger.addAppender(consoleAppender);
+            }
 
             LOGGERS.put(clazz, logger);
             return logger;
@@ -103,6 +107,22 @@ public class LoggerUtil {
     }
 
     /**
+     * Generate the path of log file </br>
+     * path [$HOME/logs/$FILE_NAME.$FILE_TYPE.$Date] </br>
+     * e.g. [/home/logs/file.csv.2020-01-02]
+     *
+     * @param fileName  file name
+     * @param hasDate   if has date as suffix
+     * @return file path
+     */
+    private static String genFilePath(String fileName, boolean hasDate){
+        String logHome = (LOG_HOME != null ? LOG_HOME+ File.separator+"logs"+File.separator : "");
+        String fileNameStr = fileName + LOG_FILE_SUFFIX;
+        String dateStr = (hasDate ? "."+DATE_FORMATTER.get().format(System.currentTimeMillis()) : "");
+        return logHome + fileNameStr + dateStr;
+    }
+
+    /**
      * Getter Logger
      *
      * @param fileName   Log File
@@ -110,7 +130,7 @@ public class LoggerUtil {
      * @return           Logger
      */
     public static Logger getLogger(String fileName, Class<?> clazz){
-        return getLogger(fileName, clazz, true);
+        return getLogger(fileName, clazz, true, true);
     }
 
     /**
@@ -121,6 +141,16 @@ public class LoggerUtil {
      */
     public static Logger getLogger(Class<?> clazz){
         return getLogger("eros", clazz);
+    }
+
+    /**
+     * Getter Logger in default model
+     *
+     * @param clazz      Class
+     * @return           Logger
+     */
+    public static Logger getLoggerNonConsole(Class<?> clazz){
+        return getLogger("eros", clazz, true, false);
     }
 
     /**

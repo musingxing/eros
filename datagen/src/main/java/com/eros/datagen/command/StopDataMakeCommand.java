@@ -1,44 +1,32 @@
 package com.eros.datagen.command;
 
-import com.eros.common.util.LoggerUtil;
-import com.eros.datagen.local.LgfJobConfig;
-import com.eros.datagen.local.LgfPCJob;
 import com.eros.job.PCJob;
 import com.eros.job.conf.JobConfig;
+import com.eros.job.manager.JobManager;
 import com.eros.shell.command.BaseCommand;
 import com.eros.shell.exception.CommandException;
 import com.eros.shell.exception.CommandParseException;
-import com.eros.shell.exception.MalformedCommandException;
 import org.apache.commons.cli.*;
-import org.apache.log4j.Logger;
-
-import java.io.File;
-import java.util.*;
 
 /**
- * Command for Creating Data Maker.
+ * Command for Stop Data Maker Job.
  *
  * dmaker [OPTIONS...] {COMMAND} ...
  *
- * dmaker create [JOB] {CONFIG}
+ * dmaker stop [JOB] {JOB_NAME}
  * e.g.
- *    dmaker create -local eros-first-job /myjob/config.xml
- *
+ *    dmaker stop --type=local --job-name=eros-first-job
  *
  * @author Eros
  * @since   2020-01-06 10:42
  */
 public class StopDataMakeCommand extends BaseCommand {
 
-    private static final Logger logger = LoggerUtil.getLogger("command", StopDataMakeCommand.class);
     private static Options options = new Options();
     static {
-        options.addOption(new Option("p", "print-", false, "print result"));
-    }
-    private static Set<String> jobTypes = new HashSet<>();
-    static {
-        jobTypes.add("local");
-        jobTypes.add("hdfs");
+        options.addOption(new Option("p", "print", false, "print result"));
+        options.addOption(new Option("t", "type",true, "job type"));
+        options.addOption(new Option("j", "job-name",true, "job name"));
     }
 
     private String[] args;
@@ -48,7 +36,7 @@ public class StopDataMakeCommand extends BaseCommand {
      * Constructor
      */
     public StopDataMakeCommand() {
-        super("dmaker stop", " ");
+        super("dmaker", "stop");
     }
 
     @Override
@@ -69,32 +57,38 @@ public class StopDataMakeCommand extends BaseCommand {
     @Override
     public boolean exec() throws CommandException {
 
-        logger.info("Command Exec: " + toString());
-        // stop job
-        PCJob job = null;
-
-        boolean print = cl.hasOption("p");
-        if(print){
-            out.println(job.getJobConfig());
+        if(!cl.hasOption("j"))
+            System.out.println("\n WARNING: Not set job name and use default: " + (String)JobConfig.JOB_NAME.defaultValue());
+        String jobName = cl.hasOption("j") ? cl.getOptionValue("t") : (String)JobConfig.JOB_NAME.defaultValue();
+        String jobType = cl.hasOption("t") ? cl.getOptionValue("t") : (String)JobConfig.JOB_TYPE_NAME.defaultValue();
+        PCJob job = JobManager.queryJob(jobType, jobName);
+        if(job == null){
+            System.out.println(String.format("\nNot found job<type=%s, name=%s>", jobType, jobName));
+            return false;
         }
 
-        return false;
+        if(cl.hasOption("p"))
+            System.out.println(String.format("\nJob<type=%s, name=%s>\n%s", jobType, jobName, job.getJobInfo()));
+
+        return true;
+    }
+
+    @Override
+    public String getUsageStr() {
+        return genUsageStr(getCmdStr(), getOptionStr(), options.getOptions());
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        return "CreateDataMakeCommand{" +
-                "args=" + Arrays.toString(args) +
-                ", cl=" + cl +
-                '}';
+        return commandToString(args, cl==null ? null : cl.getOptions());
     }
 
     public static void main(String[] args) throws Exception {
-        StopDataMakeCommand command = new StopDataMakeCommand();
+        BaseCommand command = new StopDataMakeCommand();
         String[] cmdArgs = {"dmaker", "stop"};
-        BaseCommand baseCommand = command.parse(cmdArgs);
-        System.out.println(baseCommand.toString());
-        baseCommand.exec();
+        command.parse(cmdArgs);
+        System.out.println(command.toString());
+        System.out.println(command.getUsageStr());
+        command.exec();
     }
 }

@@ -1,374 +1,153 @@
-//package com.eros.shell.main;
-//
-//import com.eros.common.util.LoggerUtil;
-//import com.eros.shell.command.BaseCommand;
-//import com.eros.shell.exception.CommandException;
-//import org.apache.log4j.Logger;
-//
-//import java.io.BufferedReader;
-//import java.io.IOException;
-//import java.io.InputStreamReader;
-//import java.lang.reflect.InvocationTargetException;
-//import java.lang.reflect.Method;
-//import java.util.ArrayList;
-//import java.util.Arrays;
-//import java.util.Collections;
-//import java.util.HashMap;
-//import java.util.Iterator;
-//import java.util.LinkedList;
-//import java.util.List;
-//import java.util.Map;
-//import java.util.Map.Entry;
-//import java.util.NoSuchElementException;
-//import java.util.regex.Matcher;
-//import java.util.regex.Pattern;
-//
-///**
-// * The command line client to ZooKeeper.
-// */
-//public class ZooKeeperMain {
-//
-//    private static final Logger LOG = LoggerUtil.getLogger(ZooKeeperMain.class);
-//    static final Map<String, String> commandMap = new HashMap<String, String>();
-//    static final Map<String, BaseCommand> commandMapCli = new HashMap<String, BaseCommand>();
-//
-//    protected MyCommandOptions cl = new MyCommandOptions();
-//    protected HashMap<Integer, String> history = new HashMap<Integer, String>();
-//    protected int commandCount = 0;
-//    protected boolean printWatches = true;
-//    protected int exitCode = ExitCode.EXECUTION_FINISHED.getValue();
-//
-//    protected String host = "";
-//
-//    public boolean getPrintWatches() {
-//        return printWatches;
-//    }
-//
-//    static {
-//        commandMap.put("connect", "host:port");
-//        commandMap.put("history", "");
-//        commandMap.put("redo", "cmdno");
-//        commandMap.put("printwatches", "on|off");
-//        commandMap.put("quit", "");
-//
-//        new CloseCommand().addToMap(commandMapCli);
-//        new CreateCommand().addToMap(commandMapCli);
-//        new DeleteCommand().addToMap(commandMapCli);
-//        new DeleteAllCommand().addToMap(commandMapCli);
-//        // Depricated: rmr
-//        new DeleteAllCommand("rmr").addToMap(commandMapCli);
-//        new SetCommand().addToMap(commandMapCli);
-//        new GetCommand().addToMap(commandMapCli);
-//        new LsCommand().addToMap(commandMapCli);
-//        new Ls2Command().addToMap(commandMapCli);
-//        new GetAclCommand().addToMap(commandMapCli);
-//        new SetAclCommand().addToMap(commandMapCli);
-//        new StatCommand().addToMap(commandMapCli);
-//        new SyncCommand().addToMap(commandMapCli);
-//        new SetQuotaCommand().addToMap(commandMapCli);
-//        new ListQuotaCommand().addToMap(commandMapCli);
-//        new DelQuotaCommand().addToMap(commandMapCli);
-//        new AddAuthCommand().addToMap(commandMapCli);
-//        new ReconfigCommand().addToMap(commandMapCli);
-//        new GetConfigCommand().addToMap(commandMapCli);
-//        new RemoveWatchesCommand().addToMap(commandMapCli);
-//        new GetEphemeralsCommand().addToMap(commandMapCli);
-//        new GetAllChildrenNumberCommand().addToMap(commandMapCli);
-//        new VersionCommand().addToMap(commandMapCli);
-//        new AddWatchCommand().addToMap(commandMapCli);
-//
-//        // add all to commandMap
-//        for (Entry<String, CliCommand> entry : commandMapCli.entrySet()) {
-//            commandMap.put(entry.getKey(), entry.getValue().getOptionStr());
-//        }
-//    }
-//
-//    static void usage() {
-//        System.err.println("ZooKeeper -server host:port cmd args");
-//        List<String> cmdList = new ArrayList<String>(commandMap.keySet());
-//        Collections.sort(cmdList);
-//        for (String cmd : cmdList) {
-//            System.err.println("\t" + cmd + " " + commandMap.get(cmd));
-//        }
-//    }
-//
-//    /**
-//     * A storage class for both command line options and shell commands.
-//     *
-//     */
-//    static class MyCommandOptions {
-//
-//        private Map<String, String> options = new HashMap<String, String>();
-//        private List<String> cmdArgs = null;
-//        private String command = null;
-//        public static final Pattern ARGS_PATTERN = Pattern.compile("\\s*([^\"\']\\S*|\"[^\"]*\"|'[^']*')\\s*");
-//        public static final Pattern QUOTED_PATTERN = Pattern.compile("^([\'\"])(.*)(\\1)$");
-//
-//        public MyCommandOptions() {
-//            options.put("server", "localhost:2181");
-//            options.put("timeout", "30000");
-//        }
-//
-//        public String getOption(String opt) {
-//            return options.get(opt);
-//        }
-//
-//        public String getCommand() {
-//            return command;
-//        }
-//
-//        public String getCmdArgument(int index) {
-//            return cmdArgs.get(index);
-//        }
-//
-//        public int getNumArguments() {
-//            return cmdArgs.size();
-//        }
-//
-//        public String[] getArgArray() {
-//            return cmdArgs.toArray(new String[0]);
-//        }
-//
-//        /**
-//         * Parses a command line that may contain one or more flags
-//         * before an optional command string
-//         * @param args command line arguments
-//         * @return true if parsing succeeded, false otherwise.
-//         */
-//        public boolean parseOptions(String[] args) {
-//            List<String> argList = Arrays.asList(args);
-//            Iterator<String> it = argList.iterator();
-//
-//            while (it.hasNext()) {
-//                String opt = it.next();
-//                try {
-//                    if (opt.equals("-server")) {
-//                        options.put("server", it.next());
-//                    } else if (opt.equals("-timeout")) {
-//                        options.put("timeout", it.next());
-//                    } else if (opt.equals("-r")) {
-//                        options.put("readonly", "true");
-//                    }
-//                } catch (NoSuchElementException e) {
-//                    System.err.println("Error: no argument found for option " + opt);
-//                    return false;
-//                }
-//
-//                if (!opt.startsWith("-")) {
-//                    command = opt;
-//                    cmdArgs = new ArrayList<String>();
-//                    cmdArgs.add(command);
-//                    while (it.hasNext()) {
-//                        cmdArgs.add(it.next());
-//                    }
-//                    return true;
-//                }
-//            }
-//            return true;
-//        }
-//
-//        /**
-//         * Breaks a string into command + arguments.
-//         * @param cmdstring string of form "cmd arg1 arg2..etc"
-//         * @return true if parsing succeeded.
-//         */
-//        public boolean parseCommand(String cmdstring) {
-//            Matcher matcher = ARGS_PATTERN.matcher(cmdstring);
-//
-//            List<String> args = new LinkedList<String>();
-//            while (matcher.find()) {
-//                String value = matcher.group(1);
-//                if (QUOTED_PATTERN.matcher(value).matches()) {
-//                    // Strip off the surrounding quotes
-//                    value = value.substring(1, value.length() - 1);
-//                }
-//                args.add(value);
-//            }
-//            if (args.isEmpty()) {
-//                return false;
-//            }
-//            command = args.get(0);
-//            cmdArgs = args;
-//            return true;
-//        }
-//
-//    }
-//
-//    /**
-//     * Makes a list of possible completions, either for commands
-//     * or for zk nodes if the token to complete begins with /
-//     *
-//     */
-//
-//    protected void addToHistory(int i, String cmd) {
-//        history.put(i, cmd);
-//    }
-//
-//    public static List<String> getCommands() {
-//        List<String> cmdList = new ArrayList<String>(commandMap.keySet());
-//        Collections.sort(cmdList);
-//        return cmdList;
-//    }
-//
-//    public static void printMessage(String msg) {
-//        System.out.println("\n" + msg);
-//    }
-//
-//
-//
-//    public static void main(String[] args) throws CommandException, IOException, InterruptedException {
-//        ZooKeeperMain main = new ZooKeeperMain(args);
-//        main.run();
-//    }
-//
-//    public ZooKeeperMain(String[] args) throws IOException, InterruptedException {
-//        cl.parseOptions(args);
-//        System.out.println("Connecting to " + cl.getOption("server"));
-//        connectToZK(cl.getOption("server"));
-//    }
-//
-//    public ZooKeeperMain(ZooKeeper zk) {
-//        this.zk = zk;
-//    }
-//
-//    void run() throws CommandException, IOException, InterruptedException {
-//        if (cl.getCommand() == null) {
-//            System.out.println("Welcome to ZooKeeper!");
-//
-//            boolean jlinemissing = false;
-//            // only use jline if it's in the classpath
-//            try {
-//                Class<?> consoleC = Class.forName("jline.console.ConsoleReader");
-//                Class<?> completorC = Class.forName("org.apache.zookeeper.JLineZNodeCompleter");
-//
-//                System.out.println("JLine support is enabled");
-//
-//                Object console = consoleC.getConstructor().newInstance();
-//
-//                Object completor = completorC.getConstructor(ZooKeeper.class).newInstance(zk);
-//                Method addCompletor = consoleC.getMethod("addCompleter", Class.forName("jline.console.completer.Completer"));
-//                addCompletor.invoke(console, completor);
-//
-//                String line;
-//                Method readLine = consoleC.getMethod("readLine", String.class);
-//                while ((line = (String) readLine.invoke(console, getPrompt())) != null) {
-//                    executeLine(line);
-//                }
-//            } catch (ClassNotFoundException
-//                    | NoSuchMethodException
-//                    | InvocationTargetException
-//                    | IllegalAccessException
-//                    | InstantiationException e
-//            ) {
-//                LOG.debug("Unable to start jline", e);
-//                jlinemissing = true;
-//            }
-//
-//            if (jlinemissing) {
-//                System.out.println("JLine support is disabled");
-//                BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-//
-//                String line;
-//                while ((line = br.readLine()) != null) {
-//                    executeLine(line);
-//                }
-//            }
-//        } else {
-//            // Command line args non-null.  Run what was passed.
-//            processCmd(cl);
-//        }
-//        ServiceUtils.requestSystemExit(exitCode);
-//    }
-//
-//    public void executeLine(String line) throws CliException, InterruptedException, IOException {
-//        if (!line.equals("")) {
-//            cl.parseCommand(line);
-//            addToHistory(commandCount, line);
-//            processCmd(cl);
-//            commandCount++;
-//        }
-//    }
-//
-//    protected boolean processCmd(MyCommandOptions co) throws CliException, IOException, InterruptedException {
-//        boolean watch = false;
-//        try {
-//            watch = processZKCmd(co);
-//            exitCode = ExitCode.EXECUTION_FINISHED.getValue();
-//        } catch (CliException ex) {
-//            exitCode = ex.getExitCode();
-//            System.err.println(ex.getMessage());
-//        }
-//        return watch;
-//    }
-//
-//    protected boolean processZKCmd(MyCommandOptions co) throws CliException, IOException, InterruptedException {
-//        String[] args = co.getArgArray();
-//        String cmd = co.getCommand();
-//        if (args.length < 1) {
-//            usage();
-//            throw new MalformedCommandException("No command entered");
-//        }
-//
-//        if (!commandMap.containsKey(cmd)) {
-//            usage();
-//            throw new CommandNotFoundException("Command not found " + cmd);
-//        }
-//
-//        boolean watch = false;
-//
-//        LOG.debug("Processing {}", cmd);
-//
-//        if (cmd.equals("quit")) {
-//            zk.close();
-//            ServiceUtils.requestSystemExit(exitCode);
-//        } else if (cmd.equals("redo") && args.length >= 2) {
-//            Integer i = Integer.decode(args[1]);
-//            if (commandCount <= i || i < 0) { // don't allow redoing this redo
-//                throw new MalformedCommandException("Command index out of range");
-//            }
-//            cl.parseCommand(history.get(i));
-//            if (cl.getCommand().equals("redo")) {
-//                throw new MalformedCommandException("No redoing redos");
-//            }
-//            history.put(commandCount, history.get(i));
-//            processCmd(cl);
-//        } else if (cmd.equals("history")) {
-//            for (int i = commandCount - 10; i <= commandCount; ++i) {
-//                if (i < 0) {
-//                    continue;
-//                }
-//                System.out.println(i + " - " + history.get(i));
-//            }
-//        } else if (cmd.equals("printwatches")) {
-//            if (args.length == 1) {
-//                System.out.println("printwatches is " + (printWatches ? "on" : "off"));
-//            } else {
-//                printWatches = args[1].equals("on");
-//            }
-//        } else if (cmd.equals("connect")) {
-//            if (args.length >= 2) {
-//                connectToZK(args[1]);
-//            } else {
-//                connectToZK(host);
-//            }
-//        }
-//
-//        // Below commands all need a live connection
-//        if (zk == null || !zk.getState().isAlive()) {
-//            System.out.println("Not connected");
-//            return false;
-//        }
-//
-//        // execute from commandMap
-//        CliCommand cliCmd = commandMapCli.get(cmd);
-//        if (cliCmd != null) {
-//            cliCmd.setZk(zk);
-//            watch = cliCmd.parse(args).exec();
-//        } else if (!commandMap.containsKey(cmd)) {
-//            usage();
-//        }
-//        return watch;
-//    }
-//
-//}
-//
+package com.eros.shell.main;
+
+import com.eros.shell.command.BaseCommand;
+import com.eros.shell.command.impl.HelpCommand;
+import com.eros.shell.command.impl.HistoryCommand;
+import com.eros.shell.command.impl.QuitCommand;
+import com.eros.shell.exception.CommandException;
+import com.eros.shell.jline.ErosCompleter;
+import com.eros.shell.util.ShellLoggerUtil;
+import org.apache.log4j.Logger;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * The command line client for eros.
+ */
+public class ErosMain {
+
+    private static final Logger LOG = ShellLoggerUtil.getLogger(ErosMain.class);
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    static {
+        try{
+            new QuitCommand();
+            new HelpCommand();
+            Class<BaseCommand> clazzCDM = ((Class<BaseCommand>)Class.forName("com.eros.datagen.command.CreateDataMakeCommand"));
+            clazzCDM.newInstance();
+            Class<BaseCommand> clazzQSDM = ((Class<BaseCommand>)Class.forName("com.eros.datagen.command.QueryStatusDataMakeCommand"));
+            clazzQSDM.newInstance();
+            Class<BaseCommand> clazzSDM = ((Class<BaseCommand>)Class.forName("com.eros.datagen.command.StopDataMakeCommand"));
+            clazzSDM.newInstance();
+        }
+        catch (Throwable e){
+            LOG.error("Fail to add instance", e);
+        }
+    }
+
+    static void usage() {
+        System.err.println("Eros cmd args:");
+        List<BaseCommand> commands = BaseCommand.getCommands();
+        Collections.sort(commands, new Comparator<BaseCommand>() {
+            @Override
+            public int compare(BaseCommand o1, BaseCommand o2) {
+                return o1.getCmdStr().compareTo(o2.getCmdStr());
+            }
+        });
+        for (BaseCommand command : commands) {
+            System.err.println("\t" + command.getCmdStr());
+        }
+    }
+
+    private final HistoryCommand history;
+
+    public ErosMain(String[] args) {
+        this.history = new HistoryCommand();
+    }
+
+    public static void main(String[] args) throws Exception {
+        ErosMain main = new ErosMain(args);
+        main.run();
+    }
+
+    void run() throws Exception {
+        System.out.println("Welcome to Eros!");
+        Terminal terminal = TerminalBuilder.builder()
+                .system(true)
+                .build();
+        LineReader reader = LineReaderBuilder.builder()
+                .terminal(terminal)
+                .completer(new ErosCompleter())
+//                .highlighter(new ErosHighlighter())
+                .appName("eros")
+                .build();
+        String line;
+        while ((line = reader.readLine(getPrompt())) != null) {
+            try{
+                executeLine(line);
+            }catch (Throwable e){
+                LOG.warn("Execute command: '" + line + "' failure", e);
+                System.err.println("\n Error: " + e.getMessage());
+            }
+        }
+    }
+
+    protected String getPrompt() {
+        return "eros(" + DATE_FORMAT.format(System.currentTimeMillis()) + "):" + history.getCommandCount() + "> ";
+    }
+
+    public void executeLine(String line) throws CommandException {
+        if (!line.equals("")) {
+            if (LOG.isInfoEnabled())
+                LOG.info("Parsing '" + line + "'");
+            BaseCommand command = parseCommand(line);
+            history.addToHistory(line);
+            if (LOG.isInfoEnabled())
+                LOG.info("Processing '" + command + "'");
+            command.exec();
+        }
+    }
+
+    public static final Pattern ARGS_PATTERN = Pattern.compile("\\s*([^\"\']\\S*|\"[^\"]*\"|'[^']*')\\s*");
+    public static final Pattern QUOTED_PATTERN = Pattern.compile("^([\'\"])(.*)(\\1)$");
+
+    /**
+     * Breaks a string into command + arguments.
+     *
+     * @param cmdstring string of form "cmd arg1 arg2..etc"
+     * @return true if parsing succeeded.
+     */
+    public BaseCommand parseCommand(String cmdstring) throws CommandException {
+        String commandLineStr = cmdstring.trim();
+        String likeCmdStr = null;
+        int len = 0;
+        List<BaseCommand> commands = BaseCommand.getCommands();
+        for (BaseCommand command : commands) {
+            String cmdStr = command.getCmdStr();
+            if (!commandLineStr.startsWith(cmdStr) || cmdStr.length() <= len)
+                continue;
+            likeCmdStr = cmdStr;
+            commandLineStr = commandLineStr.substring(cmdStr.length());
+        }
+        if (likeCmdStr == null) {
+            usage();
+            throw new CommandException("Command not found '" + commandLineStr + "'");
+        }
+
+        List<String> args = new LinkedList<String>();
+        args.add(likeCmdStr);
+        Matcher matcher = ARGS_PATTERN.matcher(commandLineStr);
+        while (matcher.find()) {
+            String value = matcher.group(1);
+            if (QUOTED_PATTERN.matcher(value).matches()) {
+                // Strip off the surrounding quotes
+                value = value.substring(1, value.length() - 1);
+            }
+            args.add(value);
+        }
+        String[] parsedCmd = new String[args.size()];
+        for(int index = 0, size = args.size();  index < size; index++){
+            parsedCmd[index] = args.get(index);
+        }
+        BaseCommand baseCommand = BaseCommand.getCommand(likeCmdStr);
+        baseCommand.parse(parsedCmd);
+        return baseCommand;
+    }
+}
+
