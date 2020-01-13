@@ -25,6 +25,7 @@
         <xstream.version>1.4.11</xstream.version>
         <jline.version>3.0.0.M1</jline.version>
         <jansi.version>1.18</jansi.version>
+        <guava.version>20.0</guava.version>
     </properties>
 
 
