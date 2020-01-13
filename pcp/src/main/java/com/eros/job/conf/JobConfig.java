@@ -1,5 +1,6 @@
 package com.eros.job.conf;
 
+import com.eros.common.string.DoubleColumnTable;
 import com.eros.common.util.DataType;
 import com.eros.common.util.XMLParser;
 
@@ -71,9 +72,13 @@ public class JobConfig {
             return Objects.hash(KEY);
         }
 
+        public String getAllInfo(){
+            return "[" + DESC + "] [default:" + DEFAULT + "] [" + KEY + "]";
+        }
+
         @Override
         public String toString() {
-            return "[" + DESC + "] [default:" + DEFAULT + "] [" + KEY + "]";
+            return KEY;
         }
     }
 
@@ -119,6 +124,10 @@ public class JobConfig {
     public JobConfig setJobTypeName(String jobTypeName) {
         kvs.put(JOB_TYPE_NAME, jobTypeName);
         return this;
+    }
+
+    public String getJobID(){
+        return getJobTypeName()+"-"+getJobName();
     }
 
     public long getPCTimeOut() {
@@ -220,6 +229,12 @@ public class JobConfig {
     @Override
     public int hashCode() {
         return Objects.hash(kvs);
+    }
+
+    public String getTableStr(){
+        DoubleColumnTable table = DoubleColumnTable.newTable( getHeadItemKey(), getHeadItemKey());
+        Map<JobConfKey, Object> copiedKVs = copyAll();
+        return table.format(copiedKVs);
     }
 
     @Override

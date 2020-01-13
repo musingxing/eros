@@ -13,7 +13,7 @@ import java.util.*;
  */
 public abstract class BaseCommand {
 
-    private static final Map<String, BaseCommand> commandMap = new HashMap<String, BaseCommand>();
+    private static Map<String, BaseCommand> COMMAND_INSTANCES = new HashMap<String, BaseCommand>();
     protected PrintStream out;
     protected PrintStream err;
     private String cmdStr;
@@ -30,7 +30,6 @@ public abstract class BaseCommand {
         this.err = System.err;
         this.cmdStr = cmdStr;
         this.optionStr = optionStr;
-        addToMap(commandMap);
     }
 
     /**
@@ -75,10 +74,9 @@ public abstract class BaseCommand {
 
     /**
      * add this command to a map. Use the command string as key.
-     * @param cmdMap
      */
-    private void addToMap(Map<String, BaseCommand> cmdMap) {
-        cmdMap.put(cmdStr, this);
+    public void addToMap() {
+        COMMAND_INSTANCES.put(cmdStr+(optionStr==null||optionStr.isEmpty() ? "" : " "+optionStr), this);
     }
 
     /**
@@ -97,16 +95,24 @@ public abstract class BaseCommand {
     public abstract boolean exec() throws CommandException;
 
     public static List<BaseCommand> getCommands(){
-        return new ArrayList<>(commandMap.values());
+        return new ArrayList<>(COMMAND_INSTANCES.values());
     }
 
     public static BaseCommand getCommand(String command){
-        return commandMap.get(command);
+        return COMMAND_INSTANCES.get(command);
     }
 
+    /**
+     * Getter usage information
+     *
+     * @param cmd             command
+     * @param optionStr       option
+     * @param options         option args
+     * @return                Usage description
+     */
     public static String genUsageStr(String cmd, String optionStr, Collection<Option> options){
         StringBuilder builder = new StringBuilder();
-        builder.append("\t").append(cmd).append("  ").append(optionStr==null?"":"["+optionStr+"]");
+        builder.append("\t").append(cmd).append("  ").append(optionStr==null||optionStr.isEmpty()?"":"["+optionStr+"]");
         if(options != null){
             for(Option option : options){
                 builder.append("\n").append("\t\t").append("-").append(option.getOpt())

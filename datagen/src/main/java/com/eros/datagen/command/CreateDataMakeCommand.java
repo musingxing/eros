@@ -76,7 +76,7 @@ public class CreateDataMakeCommand  extends BaseCommand {
 
         if(!cl.hasOption("j"))
             System.out.println("\nWARNING: Not set job name and use default: " + JobConfig.JOB_NAME.defaultValue());
-        String jobName = options.hasOption("j") ? cl.getOptionValue("j") : null;
+        String jobName = options.hasOption("j") ? cl.getOptionValue("j") : (String)JobConfig.JOB_NAME.defaultValue();
 
         String conf = cl.getOptionValue("c");
         if(conf == null || conf.isEmpty()){
@@ -90,15 +90,15 @@ public class CreateDataMakeCommand  extends BaseCommand {
         if (!confFile.exists()) {
             throw new MalformedCommandException("-c argument specify configuration file " + conf + " inexistence");
         }
-        if (!confFile.isDirectory()) {
+        if (confFile.isDirectory()) {
             throw new MalformedCommandException("-c argument specify configuration file " + conf + " is a directory");
         }
 
         switch (jobType) {
             case "local": {
-                LgfPCJob job = LgfPCJob.buildJob(jobName, conf);
+                LgfPCJob job = LgfPCJob.buildJob(jobType, jobName, conf);
                 job.startup();
-                out.println(job.getJobConfig());
+                out.println(job.getJobConfig().getTableStr());
                 break;
             }
             case "hdfs": {

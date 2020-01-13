@@ -8,6 +8,8 @@ import com.eros.shell.exception.CommandException;
 import com.eros.shell.exception.CommandParseException;
 import org.apache.commons.cli.*;
 
+import java.util.List;
+
 /**
  * Command for Creating Data Maker.
  *
@@ -25,6 +27,7 @@ public class QueryStatusDataMakeCommand extends BaseCommand {
 
     private static Options options = new Options();
     static {
+        options.addOption(new Option("a", "all",false, "all job"));
         options.addOption(new Option("t", "type",true, "job type"));
         options.addOption(new Option("j", "job-name",true, "job name"));
     }
@@ -56,9 +59,29 @@ public class QueryStatusDataMakeCommand extends BaseCommand {
 
     @Override
     public boolean exec() throws CommandException {
+
+        if(cl.hasOption("a")){
+            List<String> registeredJobs = JobManager.getRegisteredJobIDs();
+            if(registeredJobs != null && !registeredJobs.isEmpty()){
+                System.out.println("Registered Jobs: ");
+                for(String job : registeredJobs){
+                    System.out.println("\t" + job);
+                }
+            }
+
+            List<String> runningJobs = JobManager.getRunningJobIDs();
+            if(runningJobs != null && !runningJobs.isEmpty()){
+                System.out.println("RunningJobs Jobs: ");
+                for(String job : runningJobs){
+                    System.out.println("\t" + job);
+                }
+            }
+            return true;
+        }
+
         if(!cl.hasOption("j"))
             System.out.println("\nWARNING: Not set job name and use default: " + JobConfig.JOB_NAME.defaultValue() + "\n");
-        String jobName = cl.hasOption("j") ? cl.getOptionValue("t") : (String)JobConfig.JOB_NAME.defaultValue();
+        String jobName = cl.hasOption("j") ? cl.getOptionValue("j") : (String)JobConfig.JOB_NAME.defaultValue();
         String jobType = cl.hasOption("t") ? cl.getOptionValue("t") : (String)JobConfig.JOB_TYPE_NAME.defaultValue();
         PCJob job = JobManager.queryJob(jobType, jobName);
         if(job == null)

@@ -12,7 +12,7 @@ public class DoubleColumnTable {
 
     private static final char HEAD_SEP = '-';
     private static final char SEP = '|';
-    private static final int LENGTH = 192;
+    private static final int LENGTH = 128;
     private static final int MIN_LINE_LENGTH = 64;
     private static final int MAX_LINE_LENGTH = 1024;
 
@@ -67,6 +67,38 @@ public class DoubleColumnTable {
         return format.toString();
     }
 
+    public char getHeadSep() {
+        return headSep;
+    }
+
+    public char getMidSep() {
+        return midSep;
+    }
+
+    public int getLength() {
+        return length;
+    }
+
+    public String getHeader() {
+        return header;
+    }
+
+    public String getItemKey() {
+        return itemKey;
+    }
+
+    public String getItemValue() {
+        return itemValue;
+    }
+
+    public String getKey_() {
+        return key_;
+    }
+
+    public String getValue_() {
+        return value_;
+    }
+
     /**
      * Construct table formatter
      *
@@ -90,5 +122,14 @@ public class DoubleColumnTable {
      */
     public static DoubleColumnTable newTable(String itemKey, String itemValue){
         return new DoubleColumnTable(HEAD_SEP, SEP, LENGTH, itemKey, itemValue);
+    }
+
+    /**
+     * Construct table formatter
+     *
+     * @return  {@link DoubleColumnTable}
+     */
+    public static DoubleColumnTable newTable(){
+        return new DoubleColumnTable(HEAD_SEP, SEP, LENGTH, "ITEMS", "VALUES");
     }
 }

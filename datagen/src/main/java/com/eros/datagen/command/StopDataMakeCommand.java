@@ -58,8 +58,8 @@ public class StopDataMakeCommand extends BaseCommand {
     public boolean exec() throws CommandException {
 
         if(!cl.hasOption("j"))
-            System.out.println("\n WARNING: Not set job name and use default: " + (String)JobConfig.JOB_NAME.defaultValue());
-        String jobName = cl.hasOption("j") ? cl.getOptionValue("t") : (String)JobConfig.JOB_NAME.defaultValue();
+            System.out.println("\nWARNING: Not set job name and use default: " + JobConfig.JOB_NAME.defaultValue());
+        String jobName = cl.hasOption("j") ? cl.getOptionValue("j") : (String)JobConfig.JOB_NAME.defaultValue();
         String jobType = cl.hasOption("t") ? cl.getOptionValue("t") : (String)JobConfig.JOB_TYPE_NAME.defaultValue();
         PCJob job = JobManager.queryJob(jobType, jobName);
         if(job == null){
@@ -70,6 +70,8 @@ public class StopDataMakeCommand extends BaseCommand {
         if(cl.hasOption("p"))
             System.out.println(String.format("\nJob<type=%s, name=%s>\n%s", jobType, jobName, job.getJobInfo()));
 
+        job.stop("User to stop");
+        System.out.println(String.format("Stopped job<type=%s, name=%s>", jobType, jobName));
         return true;
     }
 

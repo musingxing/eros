@@ -54,7 +54,7 @@ public class JobManager{
                 }
             }
         }
-        String jobID = getJobID(job.getJobTypeName(), job.serviceName());
+        String jobID = job.serviceName();
         if(REGISTERED_PC_JOBS.containsKey(jobID) || RUNNING_PC_JOBS.containsKey(jobID)){
             throw new RuntimeException("Job: " + job.serviceName() + " exist and can't resubmit at the same time");
         }
@@ -73,8 +73,16 @@ public class JobManager{
         return RUNNING_PC_JOBS.get(jobID);
     }
 
+    public static List<String> getRegisteredJobIDs(){
+        return new ArrayList<>(REGISTERED_PC_JOBS.keySet());
+    }
+
     public static List<PCJob> getRegisteredJobs(){
         return new ArrayList<>(REGISTERED_PC_JOBS.values());
+    }
+
+    public static List<String> getRunningJobIDs(){
+        return new ArrayList<>(RUNNING_PC_JOBS.keySet());
     }
 
     public static List<PCJob> getRunningJobs(){

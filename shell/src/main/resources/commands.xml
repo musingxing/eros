@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<commands name="all-commands">
+    <!-- system commands -->
+    <command clazz="com.eros.shell.command.impl.HelpCommand" desc="help [command]"/>
+    <command clazz="com.eros.shell.command.impl.QuitCommand" desc="quit"/>
+    <command clazz="com.eros.shell.command.impl.HistoryCommand" desc="history [command]"/>
+
+    <!-- data maker commands  -->
+    <command clazz="com.eros.datagen.command.CreateDataMakeCommand" desc="dmaker create [-t job-type] [-j job-name] [-c conf] [-p print]"/>
+    <command clazz="com.eros.datagen.command.QueryStatusDataMakeCommand" desc="dmaker status [-t job-type] [-j job-name]"/>
+    <command clazz="com.eros.datagen.command.StopDataMakeCommand" desc="dmaker stop [-t job-type] [-j job-name] [-p print]"/>
+</commands>

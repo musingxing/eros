@@ -85,20 +85,24 @@ public class LgfPCJob extends PCJob<List<String>> {
     /**
      * Build Lgf-PCJob
      *
+     * @param jobType   job type
      * @param jobName   job name
      * @param confFile conf file
      * @return {@link LgfPCJob}
      */
-    public static LgfPCJob buildJob(String jobName, String confFile){
+    public static LgfPCJob buildJob(String jobType, String jobName, String confFile){
 
         LgfJobConfig config = new LgfJobConfig();
-        if(jobName != null) {
-            config.setJobName(jobName);
-        }
         // add items from config file
         Map<JobConfig.JobConfKey, Object> confKVs = (confFile==null || confFile.isEmpty())? null : LgfJobConfig.parseXMLConf(confFile);
-        if(confKVs != null && !confKVs.isEmpty())
+        if(confKVs != null && !confKVs.isEmpty()) {
             config.putAll(confKVs);
+        }
+        if(jobName != null)
+            config.setJobName(jobName);
+        if(jobType != null)
+            config.setJobTypeName(jobType);
+
         LgfPCJob job = new LgfPCJob(config);
         return job;
     }

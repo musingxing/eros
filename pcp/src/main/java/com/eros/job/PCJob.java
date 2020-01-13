@@ -74,11 +74,7 @@ public abstract class PCJob<P> implements Service, Runnable {
 
     @Override
     public String serviceName() {
-        return config.getJobName();
-    }
-
-    public String getJobTypeName(){
-        return config.getJobTypeName();
+        return config.getJobID();
     }
 
     public JobConfig getJobConfig(){
@@ -239,9 +235,9 @@ public abstract class PCJob<P> implements Service, Runnable {
         logKVs.put("Running producers", producers.size());
         logKVs.put("Running consumers", consumers.size());
         long curTime = System.currentTimeMillis();
-        SimpleDateFormat dateFormat = config.getDefaultDateFormatter();
-        String timeStr = (curTime-startupTime) + "ms [" + dateFormat.format(startupTime) + " ~ " + dateFormat.format(curTime) + "]";
-        logKVs.put("Escaped Time", timeStr);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd HH:mm:ss");
+        String timeStr = (curTime-startupTime) + "ms";
+        logKVs.put("Escaped Time(" + dateFormat.format(startupTime) + " ~ " + dateFormat.format(curTime) + ")", timeStr);
         Map<String, String> appendKVs = appendShowMSG();
         if(appendKVs != null && !appendKVs.isEmpty()){
             logKVs.putAll(appendKVs);

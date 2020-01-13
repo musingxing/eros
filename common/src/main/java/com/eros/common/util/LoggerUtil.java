@@ -130,7 +130,7 @@ public class LoggerUtil {
      * @return           Logger
      */
     public static Logger getLogger(String fileName, Class<?> clazz){
-        return getLogger(fileName, clazz, true, true);
+        return getLogger(fileName, clazz, true, false);
     }
 
     /**
@@ -149,8 +149,8 @@ public class LoggerUtil {
      * @param clazz      Class
      * @return           Logger
      */
-    public static Logger getLoggerNonConsole(Class<?> clazz){
-        return getLogger("eros", clazz, true, false);
+    public static Logger getLoggerOnConsole(Class<?> clazz){
+        return getLogger("eros", clazz, true, true);
     }
 
     /**

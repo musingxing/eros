@@ -1,9 +1,9 @@
 package com.eros.shell.command.impl;
 
+import com.eros.common.string.DoubleColumnTable;
 import com.eros.shell.command.BaseCommand;
 import com.eros.shell.exception.CommandException;
 import com.eros.shell.exception.CommandParseException;
-import org.apache.commons.cli.*;
 
 import java.util.*;
 
@@ -16,12 +16,13 @@ import java.util.*;
 public class HelpCommand extends BaseCommand {
 
     private String[] args;
+    private final DoubleColumnTable table = DoubleColumnTable.newTable('-', '|', 128, "COMMANDS", "OPTIONS");
 
     /**
      * Constructor
      */
     public HelpCommand() {
-        super("help", "command");
+        super("help", "");
     }
 
     @Override
@@ -43,30 +44,33 @@ public class HelpCommand extends BaseCommand {
                 }
             });
             for (BaseCommand command : commands) {
-                System.out.println("\n" + command.getUsageStr());
+                System.out.println(table.getHeader()+ "\n" + command.getUsageStr());
             }
-        } else {
-            List<BaseCommand> commandList = new ArrayList<>();
-            for (BaseCommand command : commands) {
-                if(Objects.equals(command.getCmdStr(), args[1]))
-                    commandList.add(command);
-            }
-            Collections.sort(commandList, new Comparator<BaseCommand>() {
-                @Override
-                public int compare(BaseCommand o1, BaseCommand o2) {
-                    return o1.getCmdStr().compareTo(o2.getCmdStr());
-                }
-            });
-            for (BaseCommand command : commandList) {
-                System.out.println("\n" + command.getUsageStr());
-            }
+            System.out.println(table.getHeader());
+            return true;
         }
+
+        List<BaseCommand> commandList = new ArrayList<>();
+        for (BaseCommand command : commands) {
+            if (Objects.equals(command.getCmdStr(), args[1]))
+                commandList.add(command);
+        }
+        Collections.sort(commandList, new Comparator<BaseCommand>() {
+            @Override
+            public int compare(BaseCommand o1, BaseCommand o2) {
+                return o1.getCmdStr().compareTo(o2.getCmdStr());
+            }
+        });
+        for (BaseCommand command : commandList) {
+            System.out.println(table.getHeader()+ "\n" + command.getUsageStr());
+        }
+        System.out.println(table.getHeader());
         return true;
     }
 
     @Override
     public String getUsageStr() {
-        return genUsageStr(getCmdStr(), getOptionStr(), null);
+        return genUsageStr(getCmdStr(), "command", null);
     }
 
     @Override
@@ -75,7 +79,7 @@ public class HelpCommand extends BaseCommand {
     }
 
     public static void main(String[] args) throws Exception {
-        String[] cmdArgs = new String[]{"help", "command"};
+        String[] cmdArgs = new String[]{"help"};
 
         HelpCommand command = new HelpCommand();
         command.parse(cmdArgs);

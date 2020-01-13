@@ -20,7 +20,7 @@ public class QuitCommand extends BaseCommand {
      * Constructor
      */
     public QuitCommand() {
-        super("quit", null);
+        super("quit", "");
     }
 
     @Override

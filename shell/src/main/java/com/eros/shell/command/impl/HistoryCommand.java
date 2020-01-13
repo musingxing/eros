@@ -19,7 +19,7 @@ public class HistoryCommand extends BaseCommand {
     private static Options options = new Options();
 
     static {
-        options.addOption(new Option("n", "number", true, "last number of command"));
+        options.addOption(new Option("n", "number", true, "most recent commands"));
     }
 
     private Map<Integer, String> history = new HashMap<Integer, String>();
@@ -31,7 +31,7 @@ public class HistoryCommand extends BaseCommand {
      * Constructor
      */
     public HistoryCommand() {
-        super("history", null);
+        super("history", "");
     }
 
     @Override
@@ -51,13 +51,13 @@ public class HistoryCommand extends BaseCommand {
 
     @Override
     public boolean exec() throws CommandException {
-        String countStr = cl.hasOption("c") ? cl.getOptionValue("c") : null;
+        String countStr = cl.hasOption("n") ? cl.getOptionValue("n") : null;
         try {
             int count = countStr == null ? 10 : Integer.parseInt(countStr);
-            for(int start = (count<history.size()?history.size()-count+1:history.size()); start <=history.size();  start++){
+            for(int start = (count<history.size()?history.size()-count+1:0); start <=history.size();  start++){
                 String cmd = history.get(start);
                 if(cmd != null)
-                    System.err.println(cmd);
+                    System.out.println(cmd);
             }
         } catch (NumberFormatException e) {
             throw new CommandException("history [-n number], '" + countStr + "' is not number");
@@ -79,7 +79,7 @@ public class HistoryCommand extends BaseCommand {
 
     @Override
     public String getUsageStr() {
-        return genUsageStr(getCmdStr(), getOptionStr(), options.getOptions());
+        return genUsageStr(getCmdStr(), "command", options.getOptions());
     }
 
     @Override
