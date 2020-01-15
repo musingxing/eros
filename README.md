@@ -1,10 +1,9 @@
 # Welcome to Eros System
 ![alt text](https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1579098824802&di=abf5698d303cf21770162ce6f76f5e7f&imgtype=0&src=http%3A%2F%2Fphotocdn.sohu.com%2F20130113%2FImg363287295.jpg "Eros")
-
-
+###
 Eros is a system based on producer and consumer mode.<br>
 It defines the frame and user only care about how to produce and consume.
----------------------------
+---------------------------------------------------------------------------------
 
 
 #### Packaging/release artifacts
@@ -17,7 +16,7 @@ And then you can find in tool-package/target directory after building the projec
 ``` package 
   eros-[version].tar.gz
 ```
----------------------------
+---------------------------------------------------------------------------------
 
 #### Quick Start Guide
 This quick start guide goes over how to run Eros on a local machine. The guide will cover the following tasks:
@@ -70,7 +69,7 @@ This job status will be show while you execute command as follow:
 ##### 3. Stop
 Ctrl+C or Ctrl+D can work, but we suggest you execute 'quit' command on eros-terminal.
 
----------------------------
+---------------------------------------------------------------------------------
 
 #### Contributing
 We always welcome new contributors to the project! We need friends!
