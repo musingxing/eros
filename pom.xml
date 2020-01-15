@@ -13,6 +13,7 @@
         <module>pcp</module>
         <module>shell</module>
         <module>datagen</module>
+        <module>tools-package</module>
     </modules>
 
     <properties>

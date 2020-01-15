@@ -77,8 +77,44 @@ public class LocalFileManager {
 
     public static LocalFileManager newFileManager(List<String> dirs, String filePrefix, String fileType){
         // check dirs
+        for(String dir : dirs){
+            File dataDir = new File(dir);
+            if(!dataDir.exists())
+                throw new RuntimeException("Data directory:" + dataDir.getAbsolutePath() + " not exists");
+            if(!dataDir.isDirectory())
+                throw new RuntimeException("Data directory:" + dataDir.getAbsolutePath() + " is not directory");
+        }
         // check filePrefix
         // check file type
         return new LocalFileManager(dirs, filePrefix, fileType);
+    }
+
+    enum FileType{
+        CSV(".csv"),
+        TXT(".txt");
+
+        private final String fileType;
+
+        FileType(String fileType) {
+            this.fileType = fileType;
+        }
+
+        public String getFileType() {
+            return fileType;
+        }
+
+        public static FileType parse(String type){
+            if(type == null || type.isEmpty())
+                throw new IllegalArgumentException("File type is empty");
+            switch (type.toUpperCase()){
+                case "CSV":
+                    return CSV;
+                case "TXT":
+                    return TXT;
+                default:
+                    throw new IllegalArgumentException("Unknown type: " + type);
+            }
+
+        }
     }
 }
