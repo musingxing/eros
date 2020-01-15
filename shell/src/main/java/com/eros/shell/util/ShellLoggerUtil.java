@@ -1,7 +1,8 @@
 package com.eros.shell.util;
 
 import com.eros.common.util.LoggerUtil;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Logger;
 
 /**
  * Logger for shell system.

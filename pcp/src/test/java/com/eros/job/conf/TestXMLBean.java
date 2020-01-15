@@ -2,7 +2,6 @@ package com.eros.job.conf;
 
 import com.eros.common.util.LoggerUtil;
 import com.eros.common.util.XMLParser;
-import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -10,11 +9,12 @@ import org.junit.runners.MethodSorters;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestXMLBean {
 
-    private static final Logger logger = LoggerUtil.getLogger("test", TestXMLBean.class);
+    private static final Logger logger = LoggerUtil.getTestLogger(TestXMLBean.class);
 
     @Test
     public void test_1_JobXMLItem(){

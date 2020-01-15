@@ -8,12 +8,12 @@ import com.eros.job.manager.JobManager;
 import com.eros.job.shared.SharedHouse;
 import com.eros.job.task.Consumer;
 import com.eros.job.task.Producer;
-import org.apache.log4j.Logger;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.LockSupport;
+import java.util.logging.Logger;
 
 /**
  * Service to control produce/consume tasks.
@@ -65,7 +65,7 @@ public abstract class PCJob<P> implements Service, Runnable {
         this.config = config;
         this.producers = Collections.newSetFromMap(new ConcurrentHashMap<>(config.getProducerNum()));
         this.consumers = Collections.newSetFromMap(new ConcurrentHashMap<>(config.getConsumerNum()));
-        this.logger = LoggerUtil.getLogger(config.getJobName(), this.getClass());
+        this.logger = LoggerUtil.getLogger(serviceName(), this.getClass());
         Object itemKey = config.getHeadItemKey();
         Object itemValue = config.getHeadItemValue();
         this.table = DoubleColumnTable.newTable(itemKey.toString(), itemValue.toString());

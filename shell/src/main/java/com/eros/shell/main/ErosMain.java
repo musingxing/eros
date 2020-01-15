@@ -8,10 +8,11 @@ import com.eros.shell.jline.ErosCompleter;
 import com.eros.shell.util.ShellLoggerUtil;
 import com.eros.shell.xml.CommandXML;
 import com.eros.shell.xml.CommandsXML;
-import org.apache.log4j.Logger;
+import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.UserInterruptException;
+import org.jline.reader.impl.DefaultHighlighter;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
@@ -23,6 +24,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,7 +55,7 @@ public class ErosMain {
 
     public ErosMain(String[] args) {
         loadAllCommands();
-        this.history = (HistoryCommand)BaseCommand.getCommand("history");
+        this.history = (HistoryCommand) BaseCommand.getCommand("history");
     }
 
     private CommandsXML getCommandsXMLDesc() throws Exception {
@@ -67,8 +70,8 @@ public class ErosMain {
             while ((line = reader.readLine()) != null) {
                 content.append(line).append("\n");
             }
-            LOG.info(content.toString());
-            return (CommandsXML)XMLParser.parseObjectFromXML(content.toString(), CommandsXML.class);
+            LOG.info("\n" + content.toString());
+            return (CommandsXML) XMLParser.parseObjectFromXML(content.toString(), CommandsXML.class);
 
         } finally {
             if (in != null)
@@ -78,30 +81,27 @@ public class ErosMain {
 
     private void loadAllCommands() {
         LOG.info("Start to load all commands from commands.xml");
-        try{
+        try {
             CommandsXML cmdsXML = getCommandsXMLDesc();
             List<CommandXML> commandsClazz = cmdsXML.getCommands();
-            if(commandsClazz == null || commandsClazz.isEmpty()){
-                LOG.warn("Not found commands from commands.xml");
+            if (commandsClazz == null || commandsClazz.isEmpty()) {
+                LOG.log(Level.WARNING, "Not found commands from commands.xml");
                 return;
             }
-            LOG.info(commandsClazz);
-            for(CommandXML cmdXml : commandsClazz){
+            for (CommandXML cmdXml : commandsClazz) {
                 LOG.info("Command xml: " + cmdXml);
-                try{
+                try {
                     String clazz = cmdXml.getClazz();
-                    if(clazz == null || clazz.isEmpty()){
-                        LOG.warn("Loading " + cmdXml + ", status=failed");
+                    if (clazz == null || clazz.isEmpty()) {
+                        LOG.log(Level.WARNING, "Loading " + cmdXml + ", status=failed");
                     }
-                    Class<BaseCommand> clazzQSDM = ((Class<BaseCommand>)Class.forName(clazz));
+                    Class<BaseCommand> clazzQSDM = ((Class<BaseCommand>) Class.forName(clazz));
                     clazzQSDM.newInstance().addToMap();
-                }
-                catch (Throwable e){
-                    LOG.warn("Fail to add instance", e);
+                } catch (Throwable e) {
+                    LOG.log(Level.WARNING, "Fail to add instance", e);
                 }
             }
-        }
-        catch (Throwable e){
+        } catch (Throwable e) {
             throw new RuntimeException("Fail to load command instance", e);
         }
     }
@@ -119,21 +119,22 @@ public class ErosMain {
         LineReader reader = LineReaderBuilder.builder()
                 .terminal(terminal)
                 .completer(new ErosCompleter())
-//                .highlighter(new ErosHighlighter())
+                .highlighter(new DefaultHighlighter())
                 .appName("eros")
                 .build();
-        try{
+        try {
             String line;
             while ((line = reader.readLine(getPrompt())) != null) {
-                try{
+                try {
                     executeLine(line);
-                }
-                catch (Throwable e){
-                    LOG.warn("Execute command: '" + line + "' failure", e);
+                } catch (Throwable e) {
+                    LOG.log(Level.WARNING, "Execute command: '" + line + "' failure", e);
                     System.err.println("\n Error: " + e.getMessage());
                 }
             }
-        }catch (UserInterruptException e){
+        } catch (UserInterruptException e) {
+            System.exit(1);
+        } catch (EndOfFileException e) {
             System.exit(1);
         }
     }
@@ -144,12 +145,10 @@ public class ErosMain {
 
     public void executeLine(String line) throws CommandException {
         if (!line.equals("")) {
-            if (LOG.isInfoEnabled())
-                LOG.info("Parsing '" + line + "'");
+            LOG.info("Parsing '" + line + "'");
             BaseCommand command = parseCommand(line);
             history.addToHistory(line);
-            if (LOG.isInfoEnabled())
-                LOG.info("Processing '" + command + "'");
+            LOG.info("Processing '" + command + "'");
             command.exec();
             System.out.println();
         }
@@ -170,7 +169,7 @@ public class ErosMain {
         int len = 0;
         List<BaseCommand> commands = BaseCommand.getCommands();
         for (BaseCommand command : commands) {
-            String cmdStr = command.getCmdStr() + (command.getOptionStr()==null||command.getOptionStr().isEmpty() ? "" : " "+command.getOptionStr());
+            String cmdStr = command.getCmdAndOpStr();
             if (!commandLineStr.startsWith(cmdStr) || cmdStr.length() <= len)
                 continue;
             likeCmdStr = cmdStr;
@@ -192,7 +191,7 @@ public class ErosMain {
             args.add(value);
         }
         String[] parsedCmd = new String[args.size()];
-        for(int index = 0, size = args.size();  index < size; index++){
+        for (int index = 0, size = args.size(); index < size; index++) {
             parsedCmd[index] = args.get(index);
         }
         BaseCommand baseCommand = BaseCommand.getCommand(likeCmdStr);

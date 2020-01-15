@@ -2,18 +2,18 @@ package com.eros.local;
 
 import com.eros.common.util.LoggerUtil;
 import com.eros.datagen.local.LocalFileManager;
-import org.apache.log4j.Logger;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class LocalFileManagerTest {
 
-    private static Logger logger = LoggerUtil.getLogger("test", LocalFileManagerTest.class);
+    private static Logger logger = LoggerUtil.getTestLogger( LocalFileManagerTest.class);
     @Test
     public void test_1_GenerateFileName(){
         List<String> dirs = new ArrayList<>();

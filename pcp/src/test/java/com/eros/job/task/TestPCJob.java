@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
 
 public class TestPCJob extends PCJob<String> {
 
@@ -74,7 +75,7 @@ public class TestPCJob extends PCJob<String> {
                 writer.write(str+"\n");
                 writer.flush();
             }catch (Throwable e){
-                logger.warn("consume,fail,cause: " + e.getMessage());
+                logger.log(Level.WARNING, "consume,fail,cause: " + e.getMessage());
             }
         }
 
@@ -85,13 +86,13 @@ public class TestPCJob extends PCJob<String> {
         @Override
         public void after() {
             try{
-                if (logger.isInfoEnabled())
+                if (logger.isLoggable(Level.INFO))
                     logger.info(String.format("task:%s ending...", taskName()));
                 if (writer == null)
                     return;
                 writer.close();
             }catch (Throwable e){
-                logger.error("fail,close file output stream", e);
+                logger.log(Level.SEVERE, "fail,close file output stream", e);
             }
         }
     }

@@ -69,14 +69,22 @@ public abstract class BaseCommand {
      * @return
      */
     public String getUsageStr() {
-        return cmdStr + " " + optionStr;
+        return getCmdAndOpStr();
+    }
+
+    /**
+     * get cmd string, contains the command and the option
+     * @return
+     */
+    public String getCmdAndOpStr() {
+        return cmdStr+(optionStr==null||optionStr.isEmpty() ? "" : " "+optionStr);
     }
 
     /**
      * add this command to a map. Use the command string as key.
      */
     public void addToMap() {
-        COMMAND_INSTANCES.put(cmdStr+(optionStr==null||optionStr.isEmpty() ? "" : " "+optionStr), this);
+        COMMAND_INSTANCES.put(getCmdAndOpStr(), this);
     }
 
     /**
@@ -123,6 +131,13 @@ public abstract class BaseCommand {
         return builder.toString();
     }
 
+    /**
+     * Command string represent
+     *
+     * @param args            args array
+     * @param options         option list
+     * @return                string represent
+     */
     public static String commandToString(String[] args, Option[] options){
         StringBuilder builder = new StringBuilder("[ ");
         if(args != null && args.length > 0){

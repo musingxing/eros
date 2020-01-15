@@ -5,7 +5,9 @@ import com.eros.common.service.Stoppable;
 import com.eros.job.PCJob;
 import com.eros.job.exception.PCException;
 import com.eros.job.shared.SharedHouse;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Consumer to consume products in continuous mode.
@@ -48,7 +50,7 @@ public abstract class Consumer<P> implements Runnable, Stoppable {
         try{
             // before action
             before();
-            if (logger.isInfoEnabled())
+            if (logger.isLoggable(Level.INFO))
                 logger.info(String.format("task:%s starting...", taskName));
 
             while (!stopped) {
@@ -63,17 +65,17 @@ public abstract class Consumer<P> implements Runnable, Stoppable {
                         break;
                 }
                 catch (PCException e) {
-                    logger.warn(String.format("consume-fail,task:%s continue,cause: ", taskName), e);
+                    logger.log(Level.WARNING, String.format("consume-fail,task:%s continue,cause: ", taskName), e);
                 }
                 catch (Throwable e){
-                    logger.error(String.format("consume-unknown error,task:%s stop,cause: ", taskName), e);
+                    logger.log(Level.SEVERE, String.format("consume-unknown error,task:%s stop,cause: ", taskName), e);
                     break;
                 }
             }
 
             // after action
             after();
-            if (logger.isInfoEnabled())
+            if (logger.isLoggable(Level.INFO))
                 logger.info(String.format("task:%s ending...", taskName));
         }
         finally {

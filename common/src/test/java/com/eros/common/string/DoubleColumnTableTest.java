@@ -1,19 +1,18 @@
 package com.eros.common.string;
 
 import com.eros.common.util.LoggerUtil;
-import org.apache.log4j.Logger;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DoubleColumnTableTest {
 
-    private static final String LOG_FILE_NAME = "test";
-    private static final Logger logger = LoggerUtil.getLogger(LOG_FILE_NAME, DoubleColumnTableTest.class);
+    private static final Logger logger = LoggerUtil.getTestLogger(DoubleColumnTableTest.class);
 
     @Test
     public void printTable_1_SetArgs(){

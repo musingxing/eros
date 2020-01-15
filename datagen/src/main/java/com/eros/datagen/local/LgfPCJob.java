@@ -7,7 +7,6 @@ import com.eros.job.PCJob;
 import com.eros.job.conf.JobConfig;
 import com.eros.job.task.Consumer;
 import com.eros.job.task.Producer;
-import org.omg.CORBA.PUBLIC_MEMBER;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

@@ -2,15 +2,17 @@ package com.eros.shell.test;
 
 import com.eros.common.util.LoggerUtil;
 import com.eros.shell.main.ErosMain;
-import org.apache.log4j.Logger;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ErosMainTest {
 
-    private static final Logger logger = LoggerUtil.getLogger("test", ErosMainTest.class);
+    private static final Logger logger = LoggerUtil.getTestLogger(ErosMainTest.class);
     private ErosMain main = new ErosMain(null);
 
     private void parseAndExec(String commandStr){
@@ -19,7 +21,7 @@ public class ErosMainTest {
             main.executeLine(commandStr);
             logger.info("Success to exec command: " + commandStr);
         }catch (Throwable e){
-            logger.error("Fail to exec command: " + commandStr, e);
+            logger.log(Level.SEVERE, "Fail to exec command: " + commandStr, e);
         }
     }
 

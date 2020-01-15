@@ -7,7 +7,6 @@ import com.eros.datagen.generator.impl.RandomHexCharsGenerator;
 import com.eros.datagen.generator.impl.RandomIntGenerator;
 import com.eros.datagen.local.LgfJobConfig;
 import com.eros.job.conf.JobConfig;
-import org.apache.log4j.Logger;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
@@ -16,11 +15,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class LgfJobConfigTest {
 
-    private static final Logger logger = LoggerUtil.getLogger("test", LgfJobConfigTest.class);
+    private static final Logger logger = LoggerUtil.getTestLogger(LgfJobConfigTest.class);
     private final LgfJobConfig jobConfig = new LgfJobConfig();
 
     @Test

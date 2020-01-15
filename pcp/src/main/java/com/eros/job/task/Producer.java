@@ -6,9 +6,10 @@ import com.eros.common.util.LoggerUtil;
 import com.eros.common.service.Stoppable;
 import com.eros.job.exception.PCException;
 import com.eros.job.shared.SharedHouse;
-import org.apache.log4j.Logger;
 
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Producer to produce products in continuous mode.
@@ -55,7 +56,7 @@ public abstract class Producer<P> implements Runnable, Stoppable {
         try{
             // before action
             before();
-            if (logger.isInfoEnabled())
+            if (logger.isLoggable(Level.INFO))
                 logger.info(String.format("task:%s starting...", taskName));
 
             while (!stopped && !sharedHouse.isConsumerStopped()) {
@@ -74,21 +75,21 @@ public abstract class Producer<P> implements Runnable, Stoppable {
                             break;
                     }
                     if (!result) {
-                        logger.warn(String.format("produce,offer,fail,task:%s,product:%s", taskName, p));
+                        logger.log(Level.WARNING, String.format("produce,offer,fail,task:%s,product:%s", taskName, p));
                     }
                 }
                 catch (PCException e) {
-                    logger.warn(String.format("produce-fail,task:%s continue,cause: ", taskName), e);
+                    logger.log(Level.WARNING, String.format("produce-fail,task:%s continue,cause: ", taskName), e);
                 }
                 catch (Throwable e){
-                    logger.error(String.format("produce-fail,task:%s stop,cause: ", taskName), e);
+                    logger.log(Level.SEVERE, String.format("produce-fail,task:%s stop,cause: ", taskName), e);
                     break;
                 }
             }
 
             // after action
             after();
-            if (logger.isInfoEnabled())
+            if (logger.isLoggable(Level.INFO))
                 logger.info(String.format("task:%s ending...", taskName));
         } finally {
             this.stopped = true;

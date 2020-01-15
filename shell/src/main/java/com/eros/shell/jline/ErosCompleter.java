@@ -1,12 +1,11 @@
 package com.eros.shell.jline;
 
 import java.util.List;
+import java.util.logging.Logger;
 
-import com.eros.common.util.LoggerUtil;
 import com.eros.shell.command.BaseCommand;
 import com.eros.shell.config.ErosShellConfig;
 import com.eros.shell.util.ShellLoggerUtil;
-import org.apache.log4j.Logger;
 import org.jline.reader.Candidate;
 import org.jline.reader.Completer;
 import org.jline.reader.LineReader;
